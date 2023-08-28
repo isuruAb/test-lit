@@ -33,19 +33,23 @@ export class MyComboBox extends MyDropdown {
   };
 
   @state()
-  filteredMenuList: string[] = [];
+  filteredMenuList: string[] = [...this.menuList];
   selectedList: string[] = [];
+  unselectedItems: string[] = [];
 
   private _handleInputChange(e: CustomEvent) {
     this.showMenu();
     this.value = (e.target as HTMLInputElement).value;
-    this.filteredMenuList = this.menuList.filter((item) =>
+    this.filteredMenuList = this.filteredMenuList.filter((item) =>
       this.filterMenu(this.value, item)
     );
   }
 
   private _handleSelectChange(e: KeyboardEvent | MouseEvent) {
-    this.value = (e.target as MyDropdownItem).innerText;
+    this.selectedList.push((e.target as MyDropdownItem).innerText);
+    this.unselectedItems = this.filteredMenuList.filter(
+      (item) => !this.selectedList.includes(item)
+    );
     this._handleSelectSlot(e);
   }
 
@@ -57,9 +61,10 @@ export class MyComboBox extends MyDropdown {
   }
 
   render() {
-    this.filteredMenuList = this.menuList.filter((item) =>
-      this.filterMenu(this.value, item)
-    );
+    console.log("this.unselectedItems==>", this.unselectedItems);
+    this.filteredMenuList = this.unselectedItems.length>0
+      ? this.unselectedItems.filter((item) => this.filterMenu(this.value, item))
+      : this.menuList.filter((item) => this.filterMenu(this.value, item));
     return html`
       <div class="combobox dropdown multiselect">
         <div
