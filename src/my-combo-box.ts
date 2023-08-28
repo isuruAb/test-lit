@@ -34,6 +34,7 @@ export class MyComboBox extends MyDropdown {
 
   @state()
   filteredMenuList: string[] = [];
+  selectedList: string[] = [];
 
   private _handleInputChange(e: CustomEvent) {
     this.showMenu();
@@ -66,7 +67,11 @@ export class MyComboBox extends MyDropdown {
           ${ref(this.myDropdown)}
           class="form-control"
         >
-          <my-badge>Sample badge (to be replaced)</my-badge>
+          ${this.selectedList.length > 0
+            ? this.selectedList.map(
+                (item) => html`<my-badge>${item}</my-badge>`
+              )
+            : html`<span></span>`}
           <input
             id="user-input"
             class="form-control-multiselect"
@@ -75,9 +80,18 @@ export class MyComboBox extends MyDropdown {
             placeholder=${this.placeholder}
             .value=${this.value}
           />
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-</svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-search"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"
+            />
+          </svg>
         </div>
         <ul class="dropdown-menu" part="menu">
           ${this.filteredMenuList.length > 0
