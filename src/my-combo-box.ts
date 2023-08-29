@@ -45,10 +45,14 @@ export class MyComboBox extends MyDropdown {
     );
   }
 
-  clickRemove(id: string) {
-    this.selectedList = this.selectedList.filter((item) => item !== id);
-    this.unselectedItems.push(id);
+  clickRemove(e) {
+    this.selectedList = this.selectedList.filter(
+      (item) => item != e.target.innerText
+    );
+    this.unselectedItems.push(e.target.innerText);
     this.unselectedItems.sort();
+    this._onClickDropdownToggle();
+
   }
 
   private _handleSelectChange(e: KeyboardEvent | MouseEvent) {
@@ -57,6 +61,7 @@ export class MyComboBox extends MyDropdown {
       (item) => !this.selectedList.includes(item)
     );
     this._handleSelectSlot(e);
+    
   }
 
   /** When clicked on any part of div-looking input, the embedded input is focus.  */
@@ -83,7 +88,7 @@ export class MyComboBox extends MyDropdown {
           ${this.selectedList.length > 0
             ? this.selectedList.map(
                 (item) =>
-                  html`<my-badge @click=${() => this.clickRemove(item)}
+                  html`<my-badge @click=${this.clickRemove}
                     >${item}</my-badge
                   >`
               )
