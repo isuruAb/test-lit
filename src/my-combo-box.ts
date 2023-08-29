@@ -37,7 +37,33 @@ export class MyComboBox extends MyDropdown {
   selectedList: string[] = [];
   unselectedItems: string[] = [];
 
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    super.connectedCallback()
+    this.addEventListener("keydown", this.handleKeyDown);
+  }
+
+  handleKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      this._handleSelectChange(e, "enter", this.filteredMenuList[0]);
+      this.value = "";
+      this.requestUpdate();
+    }
+  }
+
+  selectFirstOption() {
+    this.filteredMenuList = this.filteredMenuList.filter(
+      (item) => item !== this.filteredMenuList[0]
+    );
+    this.selectedList.push(this.filteredMenuList[0]);
+  }
+
   private _handleInputChange(e: CustomEvent) {
+    e.stopPropagation();
     this.showMenu();
     this.value = (e.target as HTMLInputElement).value;
     this.filteredMenuList = this.filteredMenuList.filter((item) =>
@@ -51,17 +77,21 @@ export class MyComboBox extends MyDropdown {
     );
     this.unselectedItems.push(e.target.innerText);
     this.unselectedItems.sort();
-    this._onClickDropdownToggle();
-
+    this.userInputElement.blur();
   }
 
-  private _handleSelectChange(e: KeyboardEvent | MouseEvent) {
-    this.selectedList.push((e.target as MyDropdownItem).innerText);
-    this.unselectedItems = this.filteredMenuList.filter(
+  private _handleSelectChange(
+    e: KeyboardEvent | MouseEvent,
+    mode: string,
+    text?: string
+  ) {
+    const selectedItem =
+      mode === "select" ? (e.target as MyDropdownItem).innerText : text;
+    this.selectedList.push(selectedItem);
+    this.unselectedItems = this.menuList.filter(
       (item) => !this.selectedList.includes(item)
     );
     this._handleSelectSlot(e);
-    
   }
 
   /** When clicked on any part of div-looking input, the embedded input is focus.  */
@@ -88,9 +118,7 @@ export class MyComboBox extends MyDropdown {
           ${this.selectedList.length > 0
             ? this.selectedList.map(
                 (item) =>
-                  html`<my-badge @click=${this.clickRemove}
-                    >${item}</my-badge
-                  >`
+                  html`<my-badge @click=${this.clickRemove}>${item}</my-badge>`
               )
             : html`<span></span>`}
           <input
@@ -120,7 +148,7 @@ export class MyComboBox extends MyDropdown {
                 (item) =>
                   html`<my-dropdown-item
                     href="javascript:void(0)"
-                    @click=${this._handleSelectChange}
+                    @click=${(e) => this._handleSelectChange(e, "select")}
                     >${item}</my-dropdown-item
                   >`
               )
