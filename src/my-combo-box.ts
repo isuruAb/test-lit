@@ -33,7 +33,7 @@ export class MyComboBox extends MyDropdown {
   };
 
   @state()
-  filteredMenuList: string[] = [...this.menuList];
+  filteredMenuList: string[] = [];
   selectedList: string[] = [];
   unselectedItems: string[] = [];
 
@@ -43,6 +43,12 @@ export class MyComboBox extends MyDropdown {
     this.filteredMenuList = this.filteredMenuList.filter((item) =>
       this.filterMenu(this.value, item)
     );
+  }
+
+  clickRemove(id: string) {
+    this.selectedList = this.selectedList.filter((item) => item !== id);
+    this.unselectedItems.push(id);
+    this.unselectedItems.sort();
   }
 
   private _handleSelectChange(e: KeyboardEvent | MouseEvent) {
@@ -61,10 +67,12 @@ export class MyComboBox extends MyDropdown {
   }
 
   render() {
-    console.log("this.unselectedItems==>", this.unselectedItems);
-    this.filteredMenuList = this.unselectedItems.length>0
-      ? this.unselectedItems.filter((item) => this.filterMenu(this.value, item))
-      : this.menuList.filter((item) => this.filterMenu(this.value, item));
+    this.filteredMenuList =
+      this.unselectedItems.length > 0
+        ? this.unselectedItems.filter((item) =>
+            this.filterMenu(this.value, item)
+          )
+        : this.menuList.filter((item) => this.filterMenu(this.value, item));
     return html`
       <div class="combobox dropdown multiselect">
         <div
@@ -74,7 +82,10 @@ export class MyComboBox extends MyDropdown {
         >
           ${this.selectedList.length > 0
             ? this.selectedList.map(
-                (item) => html`<my-badge>${item}</my-badge>`
+                (item) =>
+                  html`<my-badge @click=${() => this.clickRemove(item)}
+                    >${item}</my-badge
+                  >`
               )
             : html`<span></span>`}
           <input
