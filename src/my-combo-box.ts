@@ -42,24 +42,31 @@ export class MyComboBox extends MyDropdown {
   }
 
   connectedCallback() {
-    super.connectedCallback()
-    this.addEventListener("keydown", this.handleKeyDown);
+    super.connectedCallback();
+    this.addEventListener("keydown", this._handleKeyDown);
   }
 
-  handleKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      this._handleSelectChange(e, "enter", this.filteredMenuList[0]);
-      this.value = "";
-      this.requestUpdate();
+  private _handleKeyDown(e) {
+    switch (e.key) {
+      case "Enter":
+        e.preventDefault();
+        if (this.filteredMenuList[0]) {
+          this._handleSelectChange(e, "enter", this.filteredMenuList[0]);
+        }
+        this.value = "";
+        break;
+      case "Backspace":
+        e.preventDefault();
+        if (!this.value) {
+          const deletedItem = this.selectedList.pop();
+          this.unselectedItems.push(deletedItem);
+          this.unselectedItems.sort();
+        } else {
+          this.value = this.value.slice(0, -1);
+        }
+        break;
     }
-  }
-
-  selectFirstOption() {
-    this.filteredMenuList = this.filteredMenuList.filter(
-      (item) => item !== this.filteredMenuList[0]
-    );
-    this.selectedList.push(this.filteredMenuList[0]);
+    this.requestUpdate();
   }
 
   private _handleInputChange(e: CustomEvent) {
