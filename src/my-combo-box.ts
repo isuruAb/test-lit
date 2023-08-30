@@ -1,4 +1,4 @@
-import { html, nothing } from "lit";
+import { html } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { ref } from "lit/directives/ref.js";
 import "./components/my-badge";
@@ -37,16 +37,16 @@ export class MyComboBox extends MyDropdown {
   selectedList: string[] = [];
   unselectedItems: string[] = [];
 
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener("keydown", this._handleKeyDown);
   }
+  private _removeBadge(badge: string) {
+    this.unselectedItems.push(badge);
+    this.unselectedItems.sort();
+  }
 
-  private _handleKeyDown(e) {
+  private _handleKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case "Enter":
         e.preventDefault();
@@ -59,11 +59,12 @@ export class MyComboBox extends MyDropdown {
         e.preventDefault();
         if (!this.value) {
           const deletedItem = this.selectedList.pop();
-          this.unselectedItems.push(deletedItem);
-          this.unselectedItems.sort();
+          this._removeBadge(deletedItem);
         } else {
           this.value = this.value.slice(0, -1);
         }
+        break;
+      default:
         break;
     }
     this.requestUpdate();
@@ -78,12 +79,11 @@ export class MyComboBox extends MyDropdown {
     );
   }
 
-  clickRemove(e) {
+  private _clickRemove(e) {
     this.selectedList = this.selectedList.filter(
       (item) => item != e.target.innerText
     );
-    this.unselectedItems.push(e.target.innerText);
-    this.unselectedItems.sort();
+    this._removeBadge(e.target.innerText);
     this.userInputElement.blur();
   }
 
@@ -92,8 +92,13 @@ export class MyComboBox extends MyDropdown {
     mode: string,
     text?: string
   ) {
-    const selectedItem =
-      mode === "select" ? (e.target as MyDropdownItem).innerText : text;
+    const isSelectMode = mode === "select";
+    let selectedItem: string;
+    if (isSelectMode) {
+      selectedItem = (e.target as MyDropdownItem).innerText;
+    } else {
+      selectedItem = text;
+    }
     this.selectedList.push(selectedItem);
     this.unselectedItems = this.menuList.filter(
       (item) => !this.selectedList.includes(item)
@@ -109,12 +114,17 @@ export class MyComboBox extends MyDropdown {
   }
 
   render() {
-    this.filteredMenuList =
-      this.unselectedItems.length > 0
-        ? this.unselectedItems.filter((item) =>
-            this.filterMenu(this.value, item)
-          )
-        : this.menuList.filter((item) => this.filterMenu(this.value, item));
+    const hasSelectedItems = this.unselectedItems.length > 0;
+    if (hasSelectedItems) {
+      this.filteredMenuList = this.unselectedItems.filter((item) =>
+        this.filterMenu(this.value, item)
+      );
+    } else {
+      this.filteredMenuList = this.menuList.filter((item) =>
+        this.filterMenu(this.value, item)
+      );
+    }
+
     return html`
       <div class="combobox dropdown multiselect">
         <div
@@ -125,7 +135,7 @@ export class MyComboBox extends MyDropdown {
           ${this.selectedList.length > 0
             ? this.selectedList.map(
                 (item) =>
-                  html`<my-badge @click=${this.clickRemove}>${item}</my-badge>`
+                  html`<my-badge @click=${this._clickRemove}>${item}</my-badge>`
               )
             : html`<span></span>`}
           <input
