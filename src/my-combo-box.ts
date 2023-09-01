@@ -73,17 +73,19 @@ export class MyComboBox extends MyDropdown {
   private _handleInputChange(e: CustomEvent) {
     e.stopPropagation();
     this.showMenu();
-    this.value = (e.target as HTMLInputElement).value;
+    const targetElement = e.target as HTMLInputElement; 
+    this.value = targetElement.value;
     this.filteredMenuList = this.filteredMenuList.filter((item) =>
       this.filterMenu(this.value, item)
     );
   }
 
-  private _clickRemove(e) {
+  private _clickRemove(e: CustomEvent) {
+    const targetElement = e.target as HTMLElement; 
     this.selectedList = this.selectedList.filter(
-      (item) => item != e.target.innerText
+      (item) => item != targetElement.innerText
     );
-    this._removeBadge(e.target.innerText);
+    this._removeBadge(targetElement.innerText);
     this.userInputElement.blur();
   }
 
@@ -95,7 +97,8 @@ export class MyComboBox extends MyDropdown {
     const isSelectMode = mode === "select";
     let selectedItem: string;
     if (isSelectMode) {
-      selectedItem = (e.target as MyDropdownItem).innerText;
+      const targetElement = e.target as MyDropdownItem; 
+      selectedItem = targetElement.innerText;
     } else {
       selectedItem = text;
     }
