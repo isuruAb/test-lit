@@ -24,14 +24,6 @@ export class MyComboBox extends MyDropdown {
   /**The list of items to display in the dropdown. */
   @property({ type: Array }) menuList: string[] = [];
 
-  /**The function used to determine if a menu item should be shown in the menu list, given the user's input value. */
-  @property()
-  filterMenu: FilterFunction = (inputValue: string, menuItem: string) => {
-    const itemLowerCase = menuItem.toLowerCase();
-    const valueLower = inputValue.toLowerCase();
-    return itemLowerCase.startsWith(valueLower);
-  };
-
   @state()
   filteredMenuList: string[] = [];
   selectedList: string[] = [];
@@ -41,6 +33,17 @@ export class MyComboBox extends MyDropdown {
     super.connectedCallback();
     this.addEventListener("keydown", this._handleKeyDown);
   }
+
+  /**The function used to determine if a menu item should be shown in the menu list, given the user's input value. */
+  private _filterMenu: FilterFunction = (
+    inputValue: string,
+    menuItem: string
+  ) => {
+    const itemLowerCase = menuItem.toLowerCase();
+    const valueLower = inputValue.toLowerCase();
+    return itemLowerCase.startsWith(valueLower);
+  };
+
   private _removeBadge(badge: string) {
     this.unselectedItems.push(badge);
     this.unselectedItems.sort();
@@ -73,7 +76,7 @@ export class MyComboBox extends MyDropdown {
   private _handleInputChange(e: CustomEvent) {
     e.stopPropagation();
     this.showMenu();
-    const targetElement = e.target as HTMLInputElement; 
+    const targetElement = e.target as HTMLInputElement;
     this.value = targetElement.value;
     this.filteredMenuList = this.filteredMenuList.filter((item) =>
       this.filterMenu(this.value, item)
@@ -81,7 +84,7 @@ export class MyComboBox extends MyDropdown {
   }
 
   private _clickRemove(e: CustomEvent) {
-    const targetElement = e.target as HTMLElement; 
+    const targetElement = e.target as HTMLElement;
     this.selectedList = this.selectedList.filter(
       (item) => item != targetElement.innerText
     );
@@ -97,7 +100,7 @@ export class MyComboBox extends MyDropdown {
     const isSelectMode = mode === "select";
     let selectedItem: string;
     if (isSelectMode) {
-      const targetElement = e.target as MyDropdownItem; 
+      const targetElement = e.target as MyDropdownItem;
       selectedItem = targetElement.innerText;
     } else {
       selectedItem = text;
@@ -120,11 +123,11 @@ export class MyComboBox extends MyDropdown {
     const hasSelectedItems = this.unselectedItems.length > 0;
     if (hasSelectedItems) {
       this.filteredMenuList = this.unselectedItems.filter((item) =>
-        this.filterMenu(this.value, item)
+        this._filterMenu(this.value, item)
       );
     } else {
       this.filteredMenuList = this.menuList.filter((item) =>
-        this.filterMenu(this.value, item)
+        this._filterMenu(this.value, item)
       );
     }
 
