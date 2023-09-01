@@ -79,7 +79,7 @@ export class MyComboBox extends MyDropdown {
     const targetElement = e.target as HTMLInputElement;
     this.value = targetElement.value;
     this.filteredMenuList = this.filteredMenuList.filter((item) =>
-      this.filterMenu(this.value, item)
+      this._filterMenu(this.value, item)
     );
   }
 
